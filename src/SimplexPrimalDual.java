@@ -1,4 +1,4 @@
-package Principal;
+
 
 
 import java.util.Scanner;
@@ -11,8 +11,6 @@ public class SimplexPrimalDual {
     
     public static void main(String[] args) {
         Scanner entrada = new Scanner(System.in);
-        
-        
         
         int linhas = entrada.nextInt();
         int colunas = entrada.nextInt();
