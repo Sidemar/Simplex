@@ -2,13 +2,12 @@
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Scanner;
 //import org.apache.commons.math3.fraction.Fraction;
 //import org.apache.commons.math3.fraction.FractionFormat;
 
 public class SimplexPrimalDual {
 
-    public static String simplex(String textoEntrada) throws IOException {
+    public static void simplex(String textoEntrada) throws IOException {
         textoEntrada = textoEntrada.replaceAll("(\\t|\\r?\\n)+", " ");
         String array[] = textoEntrada.split(" ");
 
@@ -17,6 +16,7 @@ public class SimplexPrimalDual {
         int colunas = Integer.parseInt(array[2]);
 
         double[][] A = new double[linhas][colunas];
+        String[][] A2 = new String[linhas][colunas];
 
         A[0][0] = 0;
         int k = 3;
@@ -28,8 +28,43 @@ public class SimplexPrimalDual {
                 }
                 String valor = array[k++];
                 A[i][j] = Double.parseDouble(valor);
+                A2[i][j] = valor;
             }
         }
+        
+        FileWriter arq = new FileWriter("saida.txt");
+        PrintWriter gravarArq = new PrintWriter(arq);
+        
+        //Imprime o modelo
+        gravarArq.print("MODELO\n\n");
+        gravarArq.print("\t"+tipo+": Z = ");
+        for (int i = 1; i < colunas; i++) {
+            if(!"0".equals(A2[0][i]))
+                gravarArq.print(A2[0][i]+"x"+i+" ");
+        }
+        
+        gravarArq.print("\nSujeito a:\n");
+        
+        for (int i = 1; i < linhas; i++) {
+            gravarArq.print("\t");
+            for (int j = 1; j < colunas; j++) {
+                if(!"0".equals(A2[i][j]))
+                    gravarArq.print(A2[i][j]+"x"+j+" ");
+            }
+            gravarArq.print("= "+A2[i][0]);
+            gravarArq.println();
+        }
+        
+        gravarArq.print("\t");
+        for (int i = 1; i < colunas; i++) {
+            if(i == (colunas - 1))
+                gravarArq.print("x"+i+" >= 0 ");
+            else
+                gravarArq.print("x"+i+" >= 0, ");
+        }
+        gravarArq.println();
+        
+        gravarArq.print("\n");
 
         if ("min".equals(tipo)) {
             for (int j = 0; j < colunas; j++) {
@@ -52,9 +87,8 @@ public class SimplexPrimalDual {
         }
 
         // Impressão do quadro
-        FileWriter arq = new FileWriter("saida.txt");
-        PrintWriter gravarArq = new PrintWriter(arq);
         
+        gravarArq.print("QUADRO INICIAL\n");
         gravarArq.print("\t\t\t");
         for (int j = 1; j < colunas; j++) {
             gravarArq.print("X" + j + "\t\t");
@@ -181,6 +215,7 @@ public class SimplexPrimalDual {
                 System.out.println("");
             }*/
             // Impressão do quadro
+            gravarArq.print("PIVOTEAMENTO DO PRIMAL ...\n");
             gravarArq.print("\t\t\t");
             for (int j = 1; j < colunas; j++) {
                 gravarArq.print("X" + j + "\t\t");
@@ -298,6 +333,7 @@ public class SimplexPrimalDual {
             gravarArq.println("");
 
             // Impressão do quadro
+            gravarArq.print("PIVOTEAMENTO DO DUAL ...\n");
             gravarArq.print("\t\t\t");
             for (int j = 1; j < colunas; j++) {
                 gravarArq.print("X" + j + "\t\t");
@@ -319,8 +355,23 @@ public class SimplexPrimalDual {
 
         }
         
+        for (int i = 0; i < linhas; i++) {
+            if (i != 0) {
+                gravarArq.print("X" + VB[i - 1] + " = ");
+                gravarArq.printf("%.7f ", A[i][0]);
+            } else {
+                if ("max".equals(tipo)) {
+                    A[i][0] *= -1;
+                }
+                
+                gravarArq.printf("\n\nSolução = %.7f \t", A[i][0]);
+                gravarArq.printf("\nVariáveis da base: ");
+            }
+
+            gravarArq.println("");
+        }
+        
         arq.close();
         
-        return "";
     }
 }
